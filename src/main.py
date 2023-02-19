@@ -1,5 +1,6 @@
 from hello import greetings
 from calculations import calculate, DIV_OPERATOR
+from even_finder import find_even
 
 
 def main():
@@ -12,6 +13,11 @@ def main():
 
     try:
         print(calculate(first_number, second_number, operator))
+    except (TypeError, ZeroDivisionError) as err:
+        print(err)
+
+    try:
+        print(find_even(test_list))
     except (TypeError, ZeroDivisionError) as err:
         print(err)
 
