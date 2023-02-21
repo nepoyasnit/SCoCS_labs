@@ -1,4 +1,7 @@
+import collections
 import re
+from collections import Counter
+from itertools import tee
 
 
 def amount_of_sentences(text: str) -> int:
@@ -41,3 +44,17 @@ def len_of_words(text: str) -> list[int]:
 
 def average_len_of_words(text: str) -> float:
     return average(len_of_words(text))
+
+
+def ngrams(text: list[str], n: int):
+    return [text[i:i+n] for i in range(len(text)-n+1)]
+
+
+def k_repeated_ngrams(text: str, k: int = 10, n: int = 4) -> list[tuple[tuple, int]]:
+    text_ngrams = ngrams(text, n)
+
+    counter = collections.Counter(text_ngrams)
+    k_items = counter.most_common(k)
+
+    return dict(k_items)
+
