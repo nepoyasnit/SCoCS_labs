@@ -1,7 +1,5 @@
-import collections
 import re
 from collections import Counter
-from itertools import tee
 
 
 def amount_of_sentences(text: str) -> int:
@@ -53,8 +51,8 @@ def ngrams(text: list[str], n: int):
 def k_repeated_ngrams(text: str, k: int = 10, n: int = 4) -> list[tuple[tuple, int]]:
     text_ngrams = ngrams(text, n)
 
-    counter = collections.Counter(text_ngrams)
+    counter = Counter(text_ngrams)
     k_items = counter.most_common(k)
 
-    return dict(k_items)
+    return k_items
 
