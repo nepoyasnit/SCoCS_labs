@@ -25,15 +25,15 @@ class TestAmountOfSentences(unittest.TestCase):
     def test_5(self):
         self.assertEqual(amount_of_sentences('Hello, Mrs. Maxwell...'), 1)
 
-    def test_5(self):
+    def test_6(self):
         self.assertEqual(amount_of_sentences('There is some great news when it comes to job interviews. It’s not all '
                                              'doom and gloom (bad). Most recruiters these days ask the interviewees ('
                                              'you) the same basic questions.'), 3)
 
-    def test_6(self):
+    def test_7(self):
         self.assertEqual(amount_of_sentences(''), 0)
 
-    def test_7(self):
+    def test_8(self):
         self.assertEqual(amount_of_sentences('1231.'), 1)
 
 

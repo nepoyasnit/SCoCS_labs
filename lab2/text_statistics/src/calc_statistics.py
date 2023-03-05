@@ -58,11 +58,11 @@ def average_len_of_words(text: str) -> float:
     return average(len_of_words(text))
 
 
-def ngrams(text: list[str], n: int):
+def ngrams(text: str, n: int):
     return [text[i:i + n] for i in range(len(text) - n + 1)]
 
 
-def k_repeated_ngrams(text: str, k: int = 10, n: int = 4) -> list[tuple[tuple, int]]:
+def k_repeated_ngrams(text: str, k: int = 10, n: int = 4):
     text_ngrams = ngrams(text, n)
 
     counter = Counter(text_ngrams)
