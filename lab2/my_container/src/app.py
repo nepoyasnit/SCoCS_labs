@@ -14,13 +14,12 @@ class App:
     '''
     is_work = True
 
-    @staticmethod
-    def show_possible_commands(self):
+    def show_possible_commands(self, args=''):
         print('Hello! List of all commands: \n', self._all_commands)
 
     def start_app(self):
         print(f'''Hello! It's CLI program-storage for unique elements! ''')
-        self.show_possible_commands(self)
+        self.show_possible_commands()
 
         controller = ContainerController()
         cli = CLI()

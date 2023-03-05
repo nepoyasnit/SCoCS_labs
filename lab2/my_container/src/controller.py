@@ -1,3 +1,5 @@
+import re
+
 from container import UniqueContainer
 from cli import CLI
 
@@ -56,8 +58,23 @@ class ContainerController:
         else:
             print(f'The key {key} was not found')
 
-    def grep(self):
-        pass
+    def grep(self, args):
+        if not args:
+            print('Empty regexp')
+            return
+
+        try:
+            regexp = re.compile(args)
+        except re.error:
+            print('Incorrect regexp')
+            return
+
+        found_keys = self._container.grep(regexp)
+        if not found_keys:
+            print('Null elements')
+            return
+
+        print(' '.join(found_keys))
 
     def save(self, args):
         if len(self._container) != 0:
@@ -70,9 +87,14 @@ class ContainerController:
         self._container.load()
         print('Loaded successfully!')
 
-    def switch(self):
+    def switch(self, args=''):
+        if self._container:
+            self._request_for_save()
+
         username = CLI.parse_username()
         self._container = UniqueContainer(username)
+
+        self._request_for_load()
 
     def _request_for_save(self):
         user_answer = input('Do you want to save container? (y/n): ')
