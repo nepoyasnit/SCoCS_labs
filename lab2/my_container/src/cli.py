@@ -5,6 +5,11 @@ class CLI:
     def __init__(self):
         self._commands = {}
 
+    @staticmethod
+    def parse_username():
+        username = input('Enter your name: ')
+        return username
+
     def append_command(self, command: str, function: callable):
         self._commands[command] = function
 
@@ -16,7 +21,7 @@ class CLI:
             return
 
         command = user_input[0]
-        arguments = command[1] if len(command) > 1 else None
+        arguments = user_input[1] if len(user_input) > 1 else None
 
         function_from_command = self._commands.get(command)
 

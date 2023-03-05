@@ -1,4 +1,5 @@
 from container import UniqueContainer
+from cli import CLI
 
 
 class ContainerController:
@@ -14,14 +15,20 @@ class ContainerController:
 
     def add(self, args: str):
         if not args:
-            print('Nothing to add!')
+            print('Nothing to add')
             return
 
         self._split_keys(args, self._container.add)
         print('Successfully added!')
 
-    def list(self):
-        pass
+    def list(self, args):
+        container_list = self._container.list()
+
+        if not container_list:
+            print('Container is empty!')
+            return
+
+        print(' '.join(container_list))
 
     def remove(self):
         pass
@@ -33,16 +40,33 @@ class ContainerController:
         pass
 
     def save(self, args):
-        self._container.save()
-        print('Saved successfully!')
+        if len(self._container) != 0:
+            self._container.save()
+            print('Saved successfully!')
+        else:
+            print('Container is empty!')
 
     def load(self, args):
         self._container.load()
         print('Loaded successfully!')
 
     def switch(self):
-        username = input('Enter your name: ')
+        username = CLI.parse_username()
         self._container = UniqueContainer(username)
 
-    def exit(self):
-        pass
+    def _request_for_save(self):
+        user_answer = input('Do you want to save container? (y/n): ')
+
+        if user_answer.lower() in ['yes', 'y']:
+            self._container.save()
+
+    def _request_for_load(self):
+        user_answer = input('Do you want to load container? (y/n): ')
+
+        if user_answer.lower() in ['yes', 'y']:
+            self._container.load()
+
+    def exit(self, args):
+        self._request_for_save()
+        print('\nThe application is stopped. Goodbye!')
+        exit(0)
