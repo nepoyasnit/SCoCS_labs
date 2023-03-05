@@ -1,5 +1,5 @@
 from cli import CLI
-# from controller import ContainerController
+from controller import ContainerController
 
 
 class App:
@@ -20,15 +20,16 @@ class App:
 
     def start_app(self):
         print(f'''Hello! It's CLI program-storage for unique elements! ''')
-        self.show_possible_commands()
+        self.show_possible_commands(self)
 
+        controller = ContainerController()
         cli = CLI()
 
         all_commands = ['add', 'load', 'save', 'find', 'remove', 'grep', 'switch', 'list', 'exit']
         for command in all_commands:
-            cli.append_command(command)
+            cli.append_command(command, getattr(controller, command))
 
-        cli.append_command(command, getattr(controller, command))
+        cli.append_command('help', self.show_possible_commands)
 
         while self.is_work:
             cli.parse_command()

@@ -19,14 +19,8 @@ class CLI:
         arguments = command[1] if len(command) > 1 else None
 
         function_from_command = self._commands.get(command)
+
         if not function_from_command:
             print('Unknown command!')
             return
         function_from_command(arguments)
-
-    @classmethod
-    def start_app(cls):
-        app = CLI()
-
-        while cls.is_work:
-            app.parse_command()

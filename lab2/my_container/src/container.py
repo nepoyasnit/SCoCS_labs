@@ -8,8 +8,10 @@ class UniqueContainer:
     _username: str
     _container_filename: str
 
-    def __init__(self):
-        _storage = set()
+    def __init__(self, username: str):
+        self._storage = set()
+        self._username = username
+        self._container_filename = f'{username}_container.dmp'
 
     def __len__(self):
         return len(self._storage)
