@@ -3,7 +3,7 @@ from calc_statistics import amount_of_sentences, amount_of_non_declarative_sente
 
 
 def main():
-    text = input('Enter your text: ')
+    text = input('Enter your text(please, be carefully with abbreviations!): ')
     print('Amount of sentences in the text: ', amount_of_sentences(text))
     print('Amount of the non-declarative sentences in the text: ', amount_of_non_declarative_sentences(text))
     print('Average length of the word in the text in chars: ', average_len_of_words(text))

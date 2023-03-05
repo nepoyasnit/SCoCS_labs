@@ -1,10 +1,20 @@
 import re
 from collections import Counter
+from abbreviations import ONE_ABBREVIATIONS, TWO_ABBREVIATIONS
 
 
 def amount_of_sentences(text: str) -> int:
-    regex = r'([.!?] )'
-    return len([*re.finditer(regex, text)])
+    regex = r'([.!?]+)'
+    sentences_number = len([*re.finditer(regex, text)])
+    for abbr in ONE_ABBREVIATIONS:
+        if text.find(abbr) != -1:
+            sentences_number -= 1
+
+    for abbr in TWO_ABBREVIATIONS:
+        if text.find(abbr) != -1:
+            sentences_number -= 2
+
+    return sentences_number
 
 
 def amount_of_non_declarative_sentences(text: str) -> int:
@@ -45,7 +55,7 @@ def average_len_of_words(text: str) -> float:
 
 
 def ngrams(text: list[str], n: int):
-    return [text[i:i+n] for i in range(len(text)-n+1)]
+    return [text[i:i + n] for i in range(len(text) - n + 1)]
 
 
 def k_repeated_ngrams(text: str, k: int = 10, n: int = 4) -> list[tuple[tuple, int]]:
@@ -55,4 +65,3 @@ def k_repeated_ngrams(text: str, k: int = 10, n: int = 4) -> list[tuple[tuple, i
     k_items = counter.most_common(k)
 
     return k_items
-
