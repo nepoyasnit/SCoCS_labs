@@ -1,12 +1,12 @@
-from cli import CLI
+from app import App
 
 
 def main():
-    app = CLI()
-    # try:
-    app.start_app()
-    # except KeyboardInterrupt:
-    #     print('/nThe application is stopped. Goodbye!')
+    app = App()
+    try:
+        app.start_app()
+    except KeyboardInterrupt:
+        print('/nThe application is stopped. Goodbye!')
 
 
 if __name__ == '__main__':
