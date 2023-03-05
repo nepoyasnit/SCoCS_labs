@@ -18,7 +18,7 @@ def amount_of_sentences(text: str) -> int:
 
 
 def amount_of_non_declarative_sentences(text: str) -> int:
-    regex = r'([!?] )'
+    regex = r'([!?]+)'
     return len([*re.finditer(regex, text)])
 
 
@@ -40,9 +40,13 @@ def contain_words(text: str) -> bool:
 
 
 def average_len_of_sentences(text: str) -> float:
-    regex = r'([.!?] )'
+    regex = r'([.!?]+)'
     sentences = filter(contain_words, re.split(regex, text))
-    return average(list(map(lambda word: sum(len_of_words(word)), sentences)))
+    all_letters = sum(list(map(lambda word: sum(len_of_words(word)), sentences)))
+    try:
+        return all_letters / amount_of_sentences(text)
+    except ZeroDivisionError:
+        return 0
 
 
 def len_of_words(text: str) -> list[int]:
