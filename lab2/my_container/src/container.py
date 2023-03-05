@@ -4,14 +4,13 @@ import re
 
 
 class UniqueContainer:
-    _storage: set[str] = None
+    _storage: set[str] = set()
     _username: str
     _container_filename: str
 
     def __init__(self, username: str):
-        self._storage = set()
         self._username = username
-        self._container_filename = f'{username}_container.dmp'
+        self._container_filename = f'./data/{username}_container.dmp'
 
     def __len__(self):
         return len(self._storage)
@@ -26,11 +25,11 @@ class UniqueContainer:
         return key in self._storage
 
     def save(self):
-        with open(self._container_filename, 'wbr') as file:
+        with open(self._container_filename, 'wb') as file:
             pickle.dump(self._storage, file)
 
     def load(self):
-        with open(self._container_filename, 'wbr') as file:
+        with open(self._container_filename, 'rb') as file:
             loaded = pickle.load(file)
             self._storage = self._storage | loaded
 
@@ -42,4 +41,3 @@ class UniqueContainer:
 
     def grep(self, regex):
         return list(filter(lambda key: re.match(regex, key), self._storage))
-

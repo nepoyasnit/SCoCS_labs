@@ -32,11 +32,13 @@ class ContainerController:
     def grep(self):
         pass
 
-    def save(self):
-        pass
+    def save(self, args):
+        self._container.save()
+        print('Saved successfully!')
 
-    def load(self):
-        pass
+    def load(self, args):
+        self._container.load()
+        print('Loaded successfully!')
 
     def switch(self):
         username = input('Enter your name: ')
@@ -44,6 +46,3 @@ class ContainerController:
 
     def exit(self):
         pass
-
-
-
