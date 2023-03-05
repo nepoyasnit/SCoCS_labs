@@ -6,7 +6,7 @@ def main():
     try:
         App().start_app()
     except KeyboardInterrupt:
-        print('\nThe application is stopped. Goodbye!')
+        print('\nThe application stopped. Goodbye!')
 
 
 if __name__ == '__main__':

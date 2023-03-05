@@ -30,11 +30,31 @@ class ContainerController:
 
         print(' '.join(container_list))
 
-    def remove(self):
-        pass
+    def remove(self, args):
+        if not args:
+            print('The key to remove was not entered')
+            return
 
-    def find(self):
-        pass
+        self._split_keys(args, self._remove_key)
+
+    def _remove_key(self, key: str):
+        if self._container.find(key):
+            self._container.remove(key)
+            print('Key removed successfully')
+        else:
+            print(f'The key {key} was not found')
+
+    def find(self, args):
+        if not args:
+            print('Keys to find was not entered')
+            return
+        self._split_keys(args, self._find_key)
+
+    def _find_key(self, key):
+        if self._container.find(key):
+            print(f'Key: {key}')
+        else:
+            print(f'The key {key} was not found')
 
     def grep(self):
         pass
@@ -68,5 +88,5 @@ class ContainerController:
 
     def exit(self, args):
         self._request_for_save()
-        print('\nThe application is stopped. Goodbye!')
+        print('\nThe application stopped. Goodbye!')
         exit(0)
