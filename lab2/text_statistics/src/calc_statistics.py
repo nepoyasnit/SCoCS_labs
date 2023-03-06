@@ -1,6 +1,6 @@
 import re
 from collections import Counter
-from abbreviations import ONE_ABBREVIATIONS, TWO_ABBREVIATIONS
+from ..src.abbreviations import ONE_ABBREVIATIONS, TWO_ABBREVIATIONS
 
 
 def amount_of_sentences(text: str) -> int:

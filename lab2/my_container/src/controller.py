@@ -84,7 +84,11 @@ class ContainerController:
             print('Container is empty!')
 
     def load(self, args):
-        self._container.load()
+        try:
+            self._container.load()
+        except FileNotFoundError:
+            print('Container for user with this name doesn\'t exist!')
+            return
         print('Loaded successfully!')
 
     def switch(self, args=''):
@@ -94,7 +98,7 @@ class ContainerController:
         username = CLI.parse_username()
         self._container = UniqueContainer(username)
 
-        self._request_for_load()
+        self._request_for_load(args)
 
     def _request_for_save(self):
         user_answer = input('Do you want to save container? (y/n): ')
@@ -102,11 +106,11 @@ class ContainerController:
         if user_answer.lower() in ['yes', 'y']:
             self._container.save()
 
-    def _request_for_load(self):
+    def _request_for_load(self, args):
         user_answer = input('Do you want to load container? (y/n): ')
 
         if user_answer.lower() in ['yes', 'y']:
-            self._container.load()
+            self.load(args)
 
     def exit(self, args):
         self._request_for_save()

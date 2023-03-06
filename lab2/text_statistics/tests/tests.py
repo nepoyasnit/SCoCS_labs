@@ -3,8 +3,8 @@ import unittest
 from ..src.calc_statistics import (
     amount_of_sentences,
     amount_of_non_declarative_sentences,
-    average_len_of_sentences,
     average_len_of_words,
+    average_len_of_sentences,
     k_repeated_ngrams
 )
 
@@ -42,7 +42,7 @@ class TestAverageLengthOfWords(unittest.TestCase):
         self.assertEqual(average_len_of_words('Another sentence.'), 7.5)
 
     def test_2(self):
-        self.assertEqual(average_len_of_words('My strange sentence.'), 17/3)
+        self.assertEqual(average_len_of_words('My strange sentence.'), 17 / 3)
 
     def test_3(self):
         self.assertEqual(average_len_of_words(''), 0)
