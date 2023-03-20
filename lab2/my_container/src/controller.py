@@ -1,4 +1,5 @@
 import re
+import os
 
 from container import UniqueContainer
 from cli import CLI
@@ -77,6 +78,8 @@ class ContainerController:
         print(' '.join(found_keys))
 
     def save(self, args):
+        if not os.path.exists('./data'):
+            os.mkdir('data')
         if len(self._container) != 0:
             self._container.save()
             print('Saved successfully!')
@@ -84,6 +87,8 @@ class ContainerController:
             print('Container is empty!')
 
     def load(self, args):
+        if not os.path.exists('./data'):
+            os.mkdir('data')
         try:
             self._container.load()
         except FileNotFoundError:
