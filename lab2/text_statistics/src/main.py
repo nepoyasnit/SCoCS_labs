@@ -1,5 +1,10 @@
-from calc_statistics import amount_of_sentences, amount_of_non_declarative_sentences, \
-    average_len_of_words, average_len_of_sentences, k_repeated_ngrams
+from calc_statistics import (
+    amount_of_sentences,
+    amount_of_non_declarative_sentences,
+    average_len_of_words,
+    average_len_of_sentences,
+    k_repeated_ngrams
+)
 
 
 def main():
@@ -10,8 +15,13 @@ def main():
     print('Average length of the sentence in chars(words count only): ', average_len_of_sentences(text))
 
     try:
-        n, k = map(int, input('Enter N and K to get top-K repeated N-grams in the text: ').split())
-        print('Top-k repeated N-grams in the text: ', k_repeated_ngrams(text, k, n))
+        command = input('Input \'default\' if you want count default values: ')
+        if command == 'default':
+            print('Top-k repeated N-grams in the text: ', k_repeated_ngrams(text))
+        else:
+            n, k = map(int, input('Enter N and K to get top-K repeated N-grams in the text: ').split())
+            print('Top-k repeated N-grams in the text: ', k_repeated_ngrams(text, k, n))
+
     except ValueError:
         print('Invalid input!')
 
