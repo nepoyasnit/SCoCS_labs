@@ -28,6 +28,9 @@ class JsonSerializer:
         elif isinstance(obj, (list, set, tuple)):
             return self._serialize_collection(obj)
 
+    def _serialize_to_string(self, obj):
+        pass
+
     def _serialize_primitives(self, obj):
         json_string = '\n' + ' ' * self._indent + '{\n'
         json_string += ' ' * self._indent + f'"type": "{type(obj).__name__}"\n'
@@ -46,7 +49,21 @@ class JsonSerializer:
         return json_string
 
     def _serialize_collection(self, obj):
-        pass
+        json_string = '\n' + ' ' * self._indent + '{\n'
+        json_string += ' ' * self._indent + f'"type": "{type(obj).__name__}"\n'
+        json_string += ' ' * self._indent + '"value": ['
+
+        self._indent += 4
+        for i in obj:
+            json_string += self._convert_to_json_str(i) + ','
+
+        if len(json_string) > 1 and json_string[-1] == ',':
+            json_string = json_string[:-1]
+
+        self._indent -= 4
+        json_string += '\n' + ' ' * self._indent + ']\n' + ' ' * self._indent + '}'
+
+        return json_string
 
     def _serialize_dict(self, obj):
         pass
