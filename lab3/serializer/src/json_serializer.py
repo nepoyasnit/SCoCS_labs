@@ -1,4 +1,5 @@
-from constants import PRIMITIVE_TYPES
+from constants import PRIMITIVE_TYPES, UNKNOWN_TYPE_ERROR
+from supportive import convert
 
 
 class JsonSerializer:
@@ -19,7 +20,7 @@ class JsonSerializer:
         file.write(self.dumps(obj))
 
     def dumps(self, obj):
-        return self._convert_to_json_str(obj)
+        return self._convert_to_json_str(convert(obj))
 
     def _convert_to_json_str(self, obj):
         if isinstance(obj, PRIMITIVE_TYPES):
@@ -27,6 +28,12 @@ class JsonSerializer:
 
         elif isinstance(obj, (list, set, tuple)):
             return self._serialize_collection(obj)
+
+        elif isinstance(obj, dict):
+            return self._serialize_dict(obj)
+
+        else:
+            raise Exception(UNKNOWN_TYPE_ERROR)
 
     def _serialize_to_string(self, obj):
         pass
