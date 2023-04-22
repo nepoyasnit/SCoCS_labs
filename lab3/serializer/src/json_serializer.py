@@ -66,4 +66,20 @@ class JsonSerializer:
         return json_string
 
     def _serialize_dict(self, obj):
-        pass
+        json_string = '\n' + ' ' * self._indent + '{\n'
+        json_string += ' ' * self._indent + f'"type": "{type(obj).__name__}"\n'
+        json_string += ' ' * self._indent + '"value": {'
+
+        self._indent += 4
+
+        for key, value in obj.items():
+            json_string += self._convert_to_json_str(key) + ': ' + self._convert_to_json_str(value) + ', \n'
+
+        if len(json_string) > 1 and json_string[-3] == ',':
+            json_string = json_string[:-3]
+
+        json_string += '\n' + ' ' * self._indent + '}\n'
+        self._indent -= 4
+        json_string += ' ' * self._indent + '}'
+
+        return json_string
