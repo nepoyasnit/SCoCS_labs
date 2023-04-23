@@ -44,6 +44,7 @@ class JsonSerializer:
 
         if self._current_position != -1:
             self._current_position += len('"type": ')
+
         if self._current_position >= len(string_obj) or self._current_position == -1:
             return
         if string_obj[self._current_position:self._current_position + len(INT_JSON_TYPE)] == INT_JSON_TYPE:
@@ -83,6 +84,16 @@ class JsonSerializer:
         result_num = obj[position:self._current_position]
         self._current_position = obj.find('}', self._current_position) + 1
         return float(result_num) if '.' in str(result_num) else int(result_num)
+
+    def _deserialize_bool(self, obj):
+        self._current_position = obj.find('"value":', self._current_position) + len('"value": ')
+
+        if obj[self._current_position:self._current_position + 4] == 'true':
+            self._current_position = obj.find('}', self._current_position)
+            return True
+        else:
+            self._current_position = obj.find('}', self._current_position) + 1
+            return False
 
     def _serialize_primitives(self, obj):
         json_string = '\n' + ' ' * self._indent + '{\n'
