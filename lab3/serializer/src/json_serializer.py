@@ -95,6 +95,11 @@ class JsonSerializer:
             self._current_position = obj.find('}', self._current_position) + 1
             return False
 
+    def _deserialize_null(self, obj):
+        self._current_position = obj.find('"value":', self._current_position) + len('"value": ')
+        self._current_position = obj.find('}', self._current_position) + 1
+        return None
+
     def _serialize_primitives(self, obj):
         json_string = '\n' + ' ' * self._indent + '{\n'
         json_string += ' ' * self._indent + f'"type": "{type(obj).__name__}"\n'
