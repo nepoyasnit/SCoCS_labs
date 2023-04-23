@@ -18,7 +18,7 @@ class JsonSerializer:
 
     def loads(self, obj):
         self._current_position = 0
-        return deconvert(self._deconvert_from_string(obj))
+        return self._deconvert_from_string(obj)
 
     def dump(self, obj, file):
         file.write(self.dumps(obj))
@@ -71,6 +71,25 @@ class JsonSerializer:
             pass
 
         raise Exception(UNKNOWN_TYPE_ERROR)
+
+    def _deserialize_dict(self, obj):
+        self._current_position = obj.find('"value":', self._current_position) + len('"value": ')
+        unpacked_dict = {}
+
+        self._current_position += 1
+        while self._current_position < len(obj) and obj[self._current_position] != '}':
+            if obj[self._current_position] in (' ', ',', ':', '\n'):
+                self._current_position += 1
+                continue
+
+            key = self._deconvert_from_string(obj)
+            value = self._deconvert_from_string(obj)
+
+            unpacked_dict[key] = value
+
+        self._current_position = obj.find('}', self._current_position + 1) + 1
+
+        return unpacked_dict
 
     def _deserialize_string(self, obj):
         self._current_position = obj.find('"value":', self._current_position) + len('"value": ')
