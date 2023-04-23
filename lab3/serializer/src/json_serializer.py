@@ -68,9 +68,35 @@ class JsonSerializer:
         if string_obj[self._current_position:self._current_position + len(LIST_JSON_TYPE)] == LIST_JSON_TYPE or \
                 string_obj[self._current_position:self._current_position + len(SET_JSON_TYPE)] == SET_JSON_TYPE or \
                 string_obj[self._current_position:self._current_position + len(TUPLE_JSON_TYPE)] == TUPLE_JSON_TYPE:
-            pass
+            self._current_position += 1
+            index_end = string_obj.find('"', self._current_position)
+            collection_type = string_obj[self._current_position: index_end]
+            self._current_position = index_end + 1
+
+            return self._deserialize_collection(string_obj, collection_type)
 
         raise Exception(UNKNOWN_TYPE_ERROR)
+
+    def _deserialize_collection(self, obj, object_type):
+        self._current_position = obj.find('"value":', self._current_position) + len('"value": ')
+
+        unpacked_collection = []
+        self._current_position += 1
+
+        while self._current_position < len(obj) and obj[self._current_position] != ']':
+            if obj[self._current_position] in (' ', ',', '\n'):
+                self._current_position += 1
+                continue
+
+            value = self._deconvert_from_string(obj)
+            unpacked_collection.append(value)
+        self._current_position = obj.find('}', self._current_position) + 1
+
+        if object_type == 'tuple':
+            return tuple(unpacked_collection)
+        elif object_type == 'set':
+            return set(unpacked_collection)
+        return unpacked_collection
 
     def _deserialize_dict(self, obj):
         self._current_position = obj.find('"value":', self._current_position) + len('"value": ')
