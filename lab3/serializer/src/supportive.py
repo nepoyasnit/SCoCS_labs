@@ -1,7 +1,7 @@
 import inspect
-from types import LambdaType
+from types import LambdaType, ModuleType
 
-from constants import PRIMITIVE_TYPES
+from constants import PRIMITIVE_TYPES, UNKNOWN_TYPE_ERROR
 
 
 def convert(obj):
@@ -17,6 +17,22 @@ def convert(obj):
         pass
     else:
         pass
+
+
+def deconvert(obj):
+    if isinstance(obj, PRIMITIVE_TYPES):
+        return obj
+    elif isinstance(obj, dict):
+        if 'function' in obj.values():
+            pass
+        elif 'object' in obj.values():
+            pass
+        elif 'class' in obj.values():
+            pass
+    elif is_iterable(obj):
+        pass
+    else:
+        raise Exception(UNKNOWN_TYPE_ERROR)
 
 
 def is_function(obj):
@@ -46,4 +62,3 @@ def pack_iterable(obj):
         for key, value in obj.items():
             packed_dict[key] = convert(value)
         return packed_dict
-

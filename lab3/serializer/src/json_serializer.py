@@ -1,5 +1,8 @@
-from constants import PRIMITIVE_TYPES, UNKNOWN_TYPE_ERROR
-from supportive import convert
+from constants import PRIMITIVE_TYPES, UNKNOWN_TYPE_ERROR, INT_JSON_TYPE,\
+    FLOAT_JSON_TYPE, BOOL_JSON_TYPE, STR_JSON_TYPE, DICT_JSON_TYPE, \
+    SET_JSON_TYPE, TUPLE_JSON_TYPE, LIST_JSON_TYPE, NONETYPE_JSON
+
+from supportive import convert, deconvert
 
 
 class JsonSerializer:
@@ -14,7 +17,8 @@ class JsonSerializer:
         return self.loads(file.read())
 
     def loads(self, obj):
-        pass
+        self._current_position = 0
+        return deconvert(self._deconvert_from_string(obj))
 
     def dump(self, obj, file):
         file.write(self.dumps(obj))
@@ -35,8 +39,50 @@ class JsonSerializer:
         else:
             raise Exception(UNKNOWN_TYPE_ERROR)
 
-    def _serialize_to_string(self, obj):
-        pass
+    def _deconvert_from_string(self, string_obj):
+        self._current_position = string_obj.find('"type":', self._current_position)
+
+        if self._current_position != -1:
+            self._current_position += len('"type": ')
+        if self._current_position >= len(string_obj) or self._current_position == -1:
+            return
+        if string_obj[self._current_position:self._current_position + len(INT_JSON_TYPE)] == INT_JSON_TYPE:
+            self._current_position += len(INT_JSON_TYPE + '\n')
+            return self._deserialize_num(string_obj)
+        if string_obj[self._current_position:self._current_position + len(FLOAT_JSON_TYPE)] == FLOAT_JSON_TYPE:
+            self._current_position += len(FLOAT_JSON_TYPE + '\n')
+            return self._deserialize_num(string_obj)
+        if string_obj[self._current_position:self._current_position + len(BOOL_JSON_TYPE)] == BOOL_JSON_TYPE:
+            self._current_position += len(BOOL_JSON_TYPE + '\n')
+            return self._deserialize_bool(string_obj)
+        if string_obj[self._current_position:self._current_position + len(NONETYPE_JSON)] == NONETYPE_JSON:
+            self._current_position += len(NONETYPE_JSON + '\n')
+            return self._deserialize_null(string_obj)
+        if string_obj[self._current_position:self._current_position + len(STR_JSON_TYPE)] == STR_JSON_TYPE:
+            self._current_position += len(STR_JSON_TYPE + '\n')
+            return self._deserialize_string(string_obj)
+        if string_obj[self._current_position:self._current_position + len(DICT_JSON_TYPE)] == DICT_JSON_TYPE:
+            self._current_position += len(DICT_JSON_TYPE + '\n')
+            return self._deserialize_dict(string_obj)
+        if string_obj[self._current_position:self._current_position + len(LIST_JSON_TYPE)] == LIST_JSON_TYPE or \
+                string_obj[self._current_position:self._current_position + len(SET_JSON_TYPE)] == SET_JSON_TYPE or \
+                string_obj[self._current_position:self._current_position + len(TUPLE_JSON_TYPE)] == TUPLE_JSON_TYPE:
+            pass
+
+        raise Exception(UNKNOWN_TYPE_ERROR)
+
+    def _deserialize_num(self, obj):
+        self._current_position = obj.find('"value": ', self._current_position) + len('"value": ')
+        position = self._current_position
+        while self._current_position < len(obj) and \
+                (obj[self._current_position].isdigit() or
+                 obj[self._current_position] == '.' or
+                 obj[self._current_position] == '-'):
+            self._current_position += 1
+
+        result_num = obj[position:self._current_position]
+        self._current_position = obj.find('}', self._current_position) + 1
+        return float(result_num) if '.' in str(result_num) else int(result_num)
 
     def _serialize_primitives(self, obj):
         json_string = '\n' + ' ' * self._indent + '{\n'
