@@ -30,7 +30,7 @@ def deconvert(obj):
         elif 'class' in obj.values():
             pass
     elif is_iterable(obj):
-        pass
+        return pack_iterable(obj)
     else:
         raise Exception(UNKNOWN_TYPE_ERROR)
 

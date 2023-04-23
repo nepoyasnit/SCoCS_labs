@@ -18,7 +18,7 @@ class JsonSerializer:
 
     def loads(self, obj):
         self._current_position = 0
-        return self._deconvert_from_string(obj)
+        return deconvert(self._deconvert_from_string(obj))
 
     def dump(self, obj, file):
         file.write(self.dumps(obj))
