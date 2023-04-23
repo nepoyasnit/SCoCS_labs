@@ -72,6 +72,18 @@ class JsonSerializer:
 
         raise Exception(UNKNOWN_TYPE_ERROR)
 
+    def _deserialize_string(self, obj):
+        self._current_position = obj.find('"value":', self._current_position) + len('"value": ')
+
+        unpacked_string = ''
+        self._current_position += 1
+        while self._current_position < len(obj) and obj[self._current_position:self._current_position + 1] not in '"\n':
+            unpacked_string += obj[self._current_position]
+            self._current_position += 1
+        self._current_position = obj.find('}', self._current_position) + 1
+
+        return unpacked_string
+
     def _deserialize_num(self, obj):
         self._current_position = obj.find('"value": ', self._current_position) + len('"value": ')
         position = self._current_position
