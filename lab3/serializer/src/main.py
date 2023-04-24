@@ -3,4 +3,8 @@ from constants import JSON_DATA_TYPE
 
 serializer = Controller(JSON_DATA_TYPE).serializer
 
-print(serializer.loads(serializer.dumps([1, 2, 3])))
+def simple_func(a):
+    return a * a
+
+
+print(serializer.dumps(simple_func))
