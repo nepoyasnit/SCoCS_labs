@@ -8,13 +8,14 @@ from constants import PRIMITIVE_TYPES, UNKNOWN_TYPE_ERROR
 
 
 def convert(obj):
-    if isinstance(obj, PRIMITIVE_TYPES + (list, tuple, dict, set)):
+    if isinstance(obj, PRIMITIVE_TYPES):
         return obj
+    elif isinstance(obj, (list, tuple, dict, set)):
+        return pack_iterable(obj)
     elif is_iterable(obj):
         return pack_iterable(obj)
     elif is_function(obj):
-        a = pack_function(obj)
-        return a
+        return pack_function(obj)
     elif inspect.isclass(obj):
         return pack_class(obj)
     elif inspect.iscode(obj):
@@ -42,10 +43,10 @@ def pack_class(obj):
 
     for attr in inspect.getmembers(obj):
         if attr[0] not in (
-                '__mro__', '__base__', '__basicsize__',
-                '__class__', '__dictoffset__', '__name__',
-                '__qualname__', '__text_signature__', '__itemsize__',
-                '__flags__', '__weakrefoffset__', '__objclass__'
+                "__mro__", "__base__", "__basicsize__",
+                "__class__", "__dictoffset__", "__name__",
+                "__qualname__", "__text_signature__", "__itemsize__",
+                "__flags__", "__weakrefoffset__", "__objclass__"
         ) and type(attr[1]) not in (
                 WrapperDescriptorType, MethodDescriptorType,
                 BuiltinFunctionType, MappingProxyType,
@@ -53,10 +54,15 @@ def pack_class(obj):
         ):
             attr_value = getattr(obj, attr[0])
 
-            packed_class[attr[0]] = convert(attr_value)
+            if is_function(attr_value):
+                packed_class[attr[0]] = pack_function(attr_value, obj)
+            elif isinstance(attr_value, dict):
+                packed_class[attr[0]] = pack_iterable(attr_value)
+            else:
+                packed_class[attr[0]] = convert(attr_value)
 
-            packed_class['__bases__'] = [pack_class(base) for base in obj.__bases__ if base != object]
-            return packed_class
+    packed_class['__bases__'] = [pack_class(base) for base in obj.__bases__ if base != object]
+    return packed_class
 
 
 def unpack_class(obj):
