@@ -9,7 +9,6 @@ class Controller:
     def __init__(self, data_format):
         if data_format == JSON_DATA_TYPE:
             self.serializer = JsonSerializer()
-            pass
 
         elif data_format == YAML_DATA_TYPE:
             pass

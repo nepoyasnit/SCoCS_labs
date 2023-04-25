@@ -29,13 +29,10 @@ class JsonSerializer:
     def _convert_to_json_str(self, obj):
         if isinstance(obj, PRIMITIVE_TYPES):
             return self._serialize_primitives(obj)
-
         elif isinstance(obj, (list, set, tuple)):
             return self._serialize_collection(obj)
-
         elif isinstance(obj, dict):
             return self._serialize_dict(obj)
-
         else:
             raise Exception(UNKNOWN_TYPE_ERROR)
 
