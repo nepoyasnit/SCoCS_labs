@@ -1,5 +1,7 @@
 JSON_DATA_TYPE = '.json'
 
+XML_DATA_TYPE = '.xml'
+
 TOML_DATA_TYPE = '.toml'
 
 YAML_DATA_TYPE = '.yaml'

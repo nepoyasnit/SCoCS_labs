@@ -20,12 +20,23 @@ def convert(obj):
         return pack_class(obj)
     elif inspect.iscode(obj):
         return pack_inner_function(obj)
+    elif isinstance(obj, ModuleType):
+        return pack_module(obj)
     else:
         return pack_object(obj)
 
 
 def pack_inner_function(obj):
     return pack_function(FunctionType(obj, {}))
+
+
+def pack_module(obj):
+    print(obj.__name__)
+    return dict(__type=ModuleType, name=obj.__name__, data=obj)
+
+
+def unpack_module(obj):
+    return __import__(obj.get('name'))
 
 
 def pack_object(obj):
@@ -160,6 +171,8 @@ def deconvert(obj):
             return unpack_object(obj)
         elif 'class' in obj.values():
             return unpack_class(obj)
+        elif ModuleType in obj.values():
+            return unpack_module(obj)
     elif is_iterable(obj):
         return unpack_iterable(obj)
     else:

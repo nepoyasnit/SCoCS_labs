@@ -2,6 +2,7 @@ from constants import PRIMITIVE_TYPES, UNKNOWN_TYPE_ERROR, INT_JSON_TYPE,\
     FLOAT_JSON_TYPE, BOOL_JSON_TYPE, STR_JSON_TYPE, DICT_JSON_TYPE, \
     SET_JSON_TYPE, TUPLE_JSON_TYPE, LIST_JSON_TYPE, NONETYPE_JSON
 
+from types import ModuleType
 from supportive import convert, deconvert
 
 
@@ -37,6 +38,8 @@ class JsonSerializer:
             raise Exception(UNKNOWN_TYPE_ERROR)
 
     def _deconvert_from_string(self, string_obj):
+        if '__type' in string_obj and string_obj['__type'] == ModuleType:
+            return string_obj
         self._current_position = string_obj.find('"type":', self._current_position)
 
         if self._current_position != -1:
@@ -189,6 +192,8 @@ class JsonSerializer:
         return json_string
 
     def _serialize_dict(self, obj):
+        if '__type' in obj and obj['__type'] == ModuleType:
+            return obj
         json_string = '\n' + ' ' * self._indent + '{\n'
         json_string += ' ' * self._indent + f'"type": "{type(obj).__name__}"\n'
         json_string += ' ' * self._indent + '"value": {'
