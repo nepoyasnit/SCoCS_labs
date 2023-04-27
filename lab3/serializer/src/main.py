@@ -9,7 +9,7 @@ import dicttoxml
 
 serializer = Controller(XML_DATA_TYPE).serializer
 
-print(serializer.dumps(1))
-xml = dicttoxml.dicttoxml(1)
+print(serializer.dumps({1:'21', '21321':None}))
+xml = dicttoxml.dicttoxml({1:'21', '21321':None})
 print(xml)
 

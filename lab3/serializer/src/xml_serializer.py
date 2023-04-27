@@ -1,6 +1,8 @@
 import numbers
+import random
 from collections.abc import Iterable
 from xml.dom.minidom import parseString
+from constants import UNSUPPORTED_TYPE_ERROR
 
 
 ids = []
@@ -63,7 +65,7 @@ class XmlSerializer:
             return cls._convert_dict(obj, ids, parent, attr_type, item_name, cdata)
         if isinstance(obj, Iterable):
             return cls._convert_iterable(obj, ids, parent, attr_type, item_name, cdata)
-        raise TypeError('Unsupported data type: %s (%s)' % (obj, type(obj).__name__))
+        raise TypeError(UNSUPPORTED_TYPE_ERROR % (obj, type(obj).__name__))
 
     @classmethod
     def _convert_bool(cls, key, value, attr_type, cdata=False, attr=None):
@@ -96,7 +98,34 @@ class XmlSerializer:
 
     @classmethod
     def _convert_dict(cls, obj, ids, parent, attr_type, item_func, cdata):
-        pass
+        xml_string = []
+        addline = xml_string.append
+
+        item_name = 'item'
+        for key, value in obj.items():
+            attr = {} if not ids else {'id': '%s' % (cls._get_unique_id(parent))}
+
+            key, attr = cls._make_valid_xml_name(key, attr)
+
+            if type(value) == bool:
+                addline(cls._convert_bool(key, value, attr_type, cdata, attr))
+            elif isinstance(value, numbers.Number) or type(value) is str:
+                addline(cls._convert_kv(key, value, attr_type, cdata, attr))
+            elif hasattr(value, 'isoformat'):
+                addline(cls._convert_kv(key, value.isoformat(), attr_type, cdata, attr))
+            elif isinstance(value, dict):
+                if attr_type:
+                    attr['type'] = cls._get_xml_type(value)
+                addline('<%s%s>%s</%s>' % (
+                    key, cls._make_attr_string(attr),
+                    cls._convert_dict(value, ids, key, attr_type, item_func, cdata),
+                    key
+                ))
+            elif value is None:
+                addline(cls._convert_none(key, value, attr_type, cdata, attr))
+            else:
+                raise TypeError(UNSUPPORTED_TYPE_ERROR % (value, type(value).__name__))
+        return ''.join(xml_string)
 
     @classmethod
     def _convert_iterable(cls, items, ids, parent, attr_type, item_func, cdata):
@@ -194,5 +223,19 @@ class XmlSerializer:
         attr_string = ' '.join(['%s="%s"' % (k, v) for k, v in attr.items()])
         return '%s%s' % (' ' if attr_string != '' else '', attr_string)
 
+    @staticmethod
+    def _make_id(element, start=100000, end=999999):
+        return '%s_%s' % (element, random.randint(start, end))
 
+    @classmethod
+    def _get_unique_id(cls, element):
+        this_id = cls._make_id(element)
+        duplicated = True
+        while duplicated:
+            if this_id not in ids:
+                duplicated = False
+                ids.append(this_id)
+            else:
+                this_id = cls._make_id(element)
+        return ids[-1]
 
