@@ -4,7 +4,6 @@ from collections.abc import Iterable
 from xml.dom.minidom import parseString
 from constants import UNSUPPORTED_TYPE_ERROR
 
-
 ids = []
 
 
@@ -129,7 +128,54 @@ class XmlSerializer:
 
     @classmethod
     def _convert_iterable(cls, items, ids, parent, attr_type, item_func, cdata):
-        pass
+        xml_string = []
+        addline = xml_string.append
+
+        item_name = 'item'
+
+        if ids:
+            this_id = cls._get_unique_id(parent)
+        for i, item in enumerate(items):
+            attr = {} if not ids else {'id': '%s_%s' % (this_id, i + 1)}
+            if isinstance(item, numbers.Number) or type(item) is str:
+                addline(cls._convert_kv(item_name, item, attr_type, cdata, attr))
+            elif hasattr(item, 'isoformat'):
+                addline(cls._convert_kv(item_name, item.isoformat(), attr_type, cdata, attr))
+            elif type(item) == bool:
+                addline(cls._convert_bool(item_name, item.isoformat(), attr_type, cdata, attr))
+            elif isinstance(item, dict):
+                if not attr_type:
+                    addline('<%s>%s</%s>' % (
+                        item_name,
+                        cls._convert_dict(item, ids, parent, attr_type, item_func, cdata),
+                        item_name
+                    ))
+                else:
+                    addline('<%s type="dict">%s</%s>' % (
+                        item_name,
+                        cls._convert_dict(item, ids, parent, attr_type, item_func, cdata),
+                        item_name,
+                    ))
+            elif isinstance(item, Iterable):
+                if not attr_type:
+                    addline('<%s %s>%s</%s>' % (
+                        item_name, cls._make_attr_string(attr),
+                        cls._convert_iterable(item, ids, item_name, attr_type, item_func, cdata),
+                        item_name
+                    ))
+                else:
+                    addline('<%s type="list"%s>%s</%s>' % (
+                        item_name, cls._make_attr_string(attr),
+                        cls._convert_iterable(item, ids, item_name, attr_type, item_func, cdata),
+                        item_name
+                    ))
+            elif item is None:
+                addline(cls._convert_none(item_name, None, attr_type, cdata, attr))
+            else:
+                raise TypeError(UNSUPPORTED_TYPE_ERROR % (
+                    item, type(item).__name__
+                ))
+        return ''.join(xml_string)
 
     @classmethod
     def _convert_none(cls, key, value, attr_type, cdata=False, attr=None):
@@ -238,4 +284,3 @@ class XmlSerializer:
             else:
                 this_id = cls._make_id(element)
         return ids[-1]
-
