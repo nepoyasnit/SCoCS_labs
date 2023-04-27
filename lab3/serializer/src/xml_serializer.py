@@ -3,6 +3,9 @@ from collections.abc import Iterable
 from xml.dom.minidom import parseString
 
 
+ids = []
+
+
 class XmlSerializer:
     @classmethod
     def dumps(cls, obj):
@@ -64,11 +67,32 @@ class XmlSerializer:
 
     @classmethod
     def _convert_bool(cls, key, value, attr_type, cdata=False, attr=None):
-        pass
+        if attr is None:
+            attr = {}
+
+        key, attr = cls._make_valid_xml_name(key, attr)
+
+        if attr_type:
+            attr['type'] = cls._get_xml_type(value)
+        attr_string = cls._make_attr_string(attr)
+        return '<%s%s>%s</%s>' % (key, attr_string, str(value).lower(), key)
 
     @classmethod
     def _convert_kv(cls, key, value, attr_type, cdata=False, attr=None):
-        pass
+        """converts a number or string into XML"""
+        if attr is None:
+            attr = {}
+
+        key, attr = cls._make_valid_xml_name(key, attr)
+
+        if attr_type:
+            attr['type'] = cls._get_xml_type(value)
+        attr_string = cls._make_attr_string(attr)
+        return '<%s%s>%s</%s>' % (
+            key, attr_string,
+            cls._wrap_cdata(value) if cdata else cls._escape_xml(value),
+            key
+        )
 
     @classmethod
     def _convert_dict(cls, obj, ids, parent, attr_type, item_func, cdata):
@@ -122,8 +146,13 @@ class XmlSerializer:
             return False
 
     @classmethod
+    def _wrap_cdata(cls, value):
+        value = cls._unicode_me(value).replace(']]>', ']]]]><![CDATA[>')
+        return '<![CDATA[' + value + ']]>'
+
+    @classmethod
     def _escape_xml(cls, string):
-        if type(string) in str:
+        if type(string) is str:
             string = cls._unicode_me(string)
             string = string.replace('&', '&amp;')
             string = string.replace('"', '&quot;')

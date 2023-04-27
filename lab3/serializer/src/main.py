@@ -5,7 +5,11 @@ import pickle
 import cloudpickle
 import json
 import inspect
+import dicttoxml
 
 serializer = Controller(XML_DATA_TYPE).serializer
 
-print(serializer.dumps({'None': None}))
+print(serializer.dumps(1))
+xml = dicttoxml.dicttoxml(1)
+print(xml)
+
