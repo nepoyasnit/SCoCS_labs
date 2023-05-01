@@ -1,3 +1,5 @@
+import types
+
 JSON_DATA_TYPE = '.json'
 
 XML_DATA_TYPE = '.xml'
@@ -14,13 +16,47 @@ SAME_TYPE_ERROR = 'Same type of objects!'
 
 UNSUPPORTED_TYPE_ERROR = 'Unsupported data type: %s (%s)'
 
-INT_JSON_TYPE = '"int"'
-FLOAT_JSON_TYPE = '"float"'
-BOOL_JSON_TYPE = '"bool"'
-STR_JSON_TYPE = '"str"'
-LIST_JSON_TYPE = '"list"'
-TUPLE_JSON_TYPE = '"tuple"'
-SET_JSON_TYPE = '"set"'
-DICT_JSON_TYPE = '"dict"'
-NONETYPE_JSON = '"NoneType"'
-MODULE_JSON_TYPE = 'module'
+ITERATOR_TYPE = 'iterator'
+BYTES_TYPE = 'bytes'
+CODE_TYPE = 'code'
+OBJ_TYPE = 'object'
+MODULE_TYPE = 'module'
+CELL_TYPE = 'cell'
+FUNCTION_TYPE = 'function'
+CLASS_TYPE = 'type'
+SET_TYPE = 'set'
+DICT_TYPE = 'dict'
+TUPLE_TYPE = 'tuple'
+
+
+UNSERIALIZABLE_DUNDER = (
+    "__mro__",
+    "__base__",
+    "__basicsize__",
+    "__class__",
+    "__dictoffset__",
+    "__name__",
+    "__qualname__",
+    "__text_signature__",
+    "__itemsize__",
+    "__flags__",
+    "__weakrefoffset__",
+    "__objclass__",
+    "__doc__"
+)
+
+UNSERIALIZABLE_CODE_TYPES = (
+    "co_positions",
+    "co_lines",
+    "co_exceptiontable",
+    "co_lnotab",
+)
+
+UNSERIALIZABLE_TYPES = (
+    types.WrapperDescriptorType,
+    types.MethodDescriptorType,
+    types.BuiltinFunctionType,
+    types.MappingProxyType,
+    types.GetSetDescriptorType,
+)
+

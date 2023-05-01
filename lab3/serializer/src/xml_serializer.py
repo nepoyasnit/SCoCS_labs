@@ -2,19 +2,22 @@ import numbers
 import random
 from collections.abc import Iterable
 from xml.dom.minidom import parseString
+
 from constants import UNSUPPORTED_TYPE_ERROR
+from converter import Converter
 
 ids = []
 
 
 class XmlSerializer:
+
     @classmethod
     def dumps(cls, obj):
         return cls._convert_to_xml_string(obj)
 
     @classmethod
     def dump(cls, file, obj):
-        file.write(cls.dumps(obj))
+        pass
 
     @classmethod
     def loads(cls, obj):

@@ -1,11 +1,9 @@
-from supportive import convert, deconvert
-import yaml
 
 
 class YamlSerializer:
     @staticmethod
     def dumps(obj):
-        return yaml.dump(convert(obj))
+        pass
 
     @staticmethod
     def dump(obj, file):
@@ -13,7 +11,7 @@ class YamlSerializer:
 
     @staticmethod
     def loads(obj):
-        return deconvert(yaml.load(obj, Loader=yaml.FullLoader))
+        pass
 
     @staticmethod
     def load(file):

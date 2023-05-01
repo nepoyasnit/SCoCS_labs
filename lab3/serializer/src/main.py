@@ -1,15 +1,14 @@
 from controller import Controller
 from constants import JSON_DATA_TYPE, XML_DATA_TYPE
-import math
-import pickle
-import cloudpickle
-import json
-import inspect
+import supportive as sup
+from json_serializer import JsonSerializer
 import dicttoxml
 
-serializer = Controller(XML_DATA_TYPE).serializer
 
-print(serializer.dumps([1, [2, 21], 3]))
-xml = dicttoxml.dicttoxml([1, 2, 3])
-print(xml)
+def a(x):
+    return x * x
+
+
+serializer = JsonSerializer()
+f = serializer.loads(serializer.dumps(a))
 
