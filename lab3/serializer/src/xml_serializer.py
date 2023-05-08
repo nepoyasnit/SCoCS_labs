@@ -1,289 +1,165 @@
-import numbers
-import random
-from collections.abc import Iterable
-from xml.dom.minidom import parseString
-
-from constants import UNSUPPORTED_TYPE_ERROR
+from constants import UNKNOWN_TYPE_ERROR
 from converter import Converter
-
-ids = []
 
 
 class XmlSerializer:
+    _converter = Converter()
 
     @classmethod
     def dumps(cls, obj):
-        return cls._convert_to_xml_string(obj)
+        return cls._convert_to_xml_string(cls._converter.convert(obj))
 
     @classmethod
-    def dump(cls, file, obj):
-        pass
+    def dump(cls, obj, file):
+        file.write(cls.dumps(obj))
 
     @classmethod
     def loads(cls, obj):
-        pass
+        result, _ = cls._deconvert_from_xml_string(obj)
+        return cls._converter.deconvert(result)
 
     @classmethod
-    def load(cls, file, obj):
-        pass
+    def load(cls, file):
+        return cls.loads(file.write())
 
     @classmethod
-    def _convert_to_xml_string(cls, obj, root=True, xml_declaration=True, include_encoding=True,
-                               encoding='UTF-8', custom_root='root', return_bytes=True,
-                               ids=False, cdata=False, attr_type=True):
-        xml_string = []
-        addline = xml_string.append
-        if root:
-            if xml_declaration:
-                if not include_encoding:
-                    addline('<?xml version="1.0" ?>')
-                else:
-                    addline('<?xml version="1.0" encoding="%s" ?>' % encoding)
-            addline('<%s>%s</%s>' % (
-                custom_root,
-                cls._convert(obj, ids, attr_type, cdata, parent=custom_root),
-                custom_root
-            ))
-        else:
-            addline(cls._convert(obj, ids, attr_type, cdata, parent=''))
-
-        if not return_bytes:
-            return ''.join(xml_string)
-        return ''.join(xml_string).encode('utf-8')
-
-    @classmethod
-    def _convert(cls, obj, ids, attr_type, cdata, parent):
-        item_name = 'item'
-
-        if obj is None:
-            return cls._convert_none(item_name, obj, attr_type, cdata)
-        if type(obj) == bool:
-            return cls._convert_bool(item_name, obj, attr_type, cdata)
-        if isinstance(obj, numbers.Number) or type(obj) == str:
-            return cls._convert_kv(item_name, obj, attr_type, cdata)
-        if hasattr(obj, 'isoformat'):
-            return cls._convert_kv(item_name, obj.isoformat(), attr_type, cdata)
+    def _convert_to_xml_string(cls, obj):
+        if isinstance(obj, bool):
+            return f'<bool>{str(obj)}</bool>'
+        if isinstance(obj, int):
+            return f'<int>{str(obj)}</int>'
+        if isinstance(obj, float):
+            return f'<float>{str(obj)}</float>'
+        if isinstance(obj, str):
+            return f'<str>{obj}</str>'
+        if isinstance(obj, type(None)):
+            return f'<none>None</none>'
+        if isinstance(obj, (list, tuple)):
+            return f"<list>{''.join(list(map(cls.dumps, obj)))}</list>"
         if isinstance(obj, dict):
-            return cls._convert_dict(obj, ids, parent, attr_type, item_name, cdata)
-        if isinstance(obj, Iterable):
-            return cls._convert_iterable(obj, ids, parent, attr_type, item_name, cdata)
-        raise TypeError(UNSUPPORTED_TYPE_ERROR % (obj, type(obj).__name__))
+            data = ''.join(
+                [f'<{key}>{cls.dumps(value)}</{key}>' for (key, value) in obj.items()]
+            )
+            return f'<dict>{data}</dict>'
+        raise Exception(UNKNOWN_TYPE_ERROR)
 
     @classmethod
-    def _convert_bool(cls, key, value, attr_type, cdata=False, attr=None):
-        if attr is None:
-            attr = {}
+    def _deconvert_from_xml_string(cls, obj, start_position=0):
+        index = start_position
+        if obj[index] != '<':
+            raise Exception(f'Invalid symbol at position {index}')
 
-        key, attr = cls._make_valid_xml_name(key, attr)
+        type_start_index = index + 1
+        type_end_index = index
 
-        if attr_type:
-            attr['type'] = cls._get_xml_type(value)
-        attr_string = cls._make_attr_string(attr)
-        return '<%s%s>%s</%s>' % (key, attr_string, str(value).lower(), key)
+        while obj[type_end_index] != '>':
+            type_end_index += 1
 
-    @classmethod
-    def _convert_kv(cls, key, value, attr_type, cdata=False, attr=None):
-        """converts a number or string into XML"""
-        if attr is None:
-            attr = {}
+        obj_type = obj[type_start_index:type_end_index]
+        method_name = f'_loads_{obj_type}'
 
-        key, attr = cls._make_valid_xml_name(key, attr)
+        if not hasattr(cls, method_name):
+            raise Exception(UNKNOWN_TYPE_ERROR)
+        index = type_end_index + 1
 
-        if attr_type:
-            attr['type'] = cls._get_xml_type(value)
-        attr_string = cls._make_attr_string(attr)
-        return '<%s%s>%s</%s>' % (
-            key, attr_string,
-            cls._wrap_cdata(value) if cdata else cls._escape_xml(value),
-            key
-        )
+        return getattr(cls, method_name)(obj, index)
 
     @classmethod
-    def _convert_dict(cls, obj, ids, parent, attr_type, item_func, cdata):
-        xml_string = []
-        addline = xml_string.append
+    def _loads_str(cls, obj, start_position):
+        end_position = start_position
+        while obj[end_position:end_position + 6] != '</str>':
+            end_position += 1
 
-        item_name = 'item'
-        for key, value in obj.items():
-            attr = {} if not ids else {'id': '%s' % (cls._get_unique_id(parent))}
-
-            key, attr = cls._make_valid_xml_name(key, attr)
-
-            if type(value) == bool:
-                addline(cls._convert_bool(key, value, attr_type, cdata, attr))
-            elif isinstance(value, numbers.Number) or type(value) is str:
-                addline(cls._convert_kv(key, value, attr_type, cdata, attr))
-            elif hasattr(value, 'isoformat'):
-                addline(cls._convert_kv(key, value.isoformat(), attr_type, cdata, attr))
-            elif isinstance(value, dict):
-                if attr_type:
-                    attr['type'] = cls._get_xml_type(value)
-                addline('<%s%s>%s</%s>' % (
-                    key, cls._make_attr_string(attr),
-                    cls._convert_dict(value, ids, key, attr_type, item_func, cdata),
-                    key
-                ))
-            elif value is None:
-                addline(cls._convert_none(key, value, attr_type, cdata, attr))
-            else:
-                raise TypeError(UNSUPPORTED_TYPE_ERROR % (value, type(value).__name__))
-        return ''.join(xml_string)
+        return obj[start_position:end_position], end_position + 6
 
     @classmethod
-    def _convert_iterable(cls, items, ids, parent, attr_type, item_func, cdata):
-        xml_string = []
-        addline = xml_string.append
+    def _loads_bool(cls, obj, start_position):
+        end_position = start_position
+        while obj[end_position:end_position + 7] != '</bool>':
+            end_position += 1
 
-        item_name = 'item'
+        bool_obj = obj[start_position:end_position]
 
-        if ids:
-            this_id = cls._get_unique_id(parent)
-        for i, item in enumerate(items):
-            attr = {} if not ids else {'id': '%s_%s' % (this_id, i + 1)}
-            if isinstance(item, numbers.Number) or type(item) is str:
-                addline(cls._convert_kv(item_name, item, attr_type, cdata, attr))
-            elif hasattr(item, 'isoformat'):
-                addline(cls._convert_kv(item_name, item.isoformat(), attr_type, cdata, attr))
-            elif type(item) == bool:
-                addline(cls._convert_bool(item_name, item.isoformat(), attr_type, cdata, attr))
-            elif isinstance(item, dict):
-                if not attr_type:
-                    addline('<%s>%s</%s>' % (
-                        item_name,
-                        cls._convert_dict(item, ids, parent, attr_type, item_func, cdata),
-                        item_name
-                    ))
-                else:
-                    addline('<%s type="dict">%s</%s>' % (
-                        item_name,
-                        cls._convert_dict(item, ids, parent, attr_type, item_func, cdata),
-                        item_name,
-                    ))
-            elif isinstance(item, Iterable):
-                if not attr_type:
-                    addline('<%s %s>%s</%s>' % (
-                        item_name, cls._make_attr_string(attr),
-                        cls._convert_iterable(item, ids, item_name, attr_type, item_func, cdata),
-                        item_name
-                    ))
-                else:
-                    addline('<%s type="list"%s>%s</%s>' % (
-                        item_name, cls._make_attr_string(attr),
-                        cls._convert_iterable(item, ids, item_name, attr_type, item_func, cdata),
-                        item_name
-                    ))
-            elif item is None:
-                addline(cls._convert_none(item_name, None, attr_type, cdata, attr))
-            else:
-                raise TypeError(UNSUPPORTED_TYPE_ERROR % (
-                    item, type(item).__name__
-                ))
-        return ''.join(xml_string)
+        if bool_obj == 'True':
+            return True, end_position + 7
+        else:
+            return False, end_position + 7
 
     @classmethod
-    def _convert_none(cls, key, value, attr_type, cdata=False, attr=None):
-        if attr is None:
-            attr = {}
+    def _loads_int(cls, obj, start_position):
+        end_position = start_position
+        while obj[end_position:end_position + 6] != '</int>':
+            end_position += 1
 
-        key, attr = cls._make_valid_xml_name(key, attr)
-
-        if attr_type:
-            attr['type'] = cls._get_xml_type(value)
-        attr_string = cls._make_attr_string(attr)
-        return '<%s%s></%s>' % (key, attr_string, key)
+        int_obj = obj[start_position:end_position]
+        return int(int_obj), end_position + 6
 
     @classmethod
-    def _make_valid_xml_name(cls, key, attr):
-        key = cls._escape_xml(key)
-        attr = cls._escape_xml(attr)
+    def _loads_float(cls, obj, start_position):
+        end_position = start_position
+        while obj[end_position:end_position + 8] != '</float>':
+            end_position += 1
 
-        if cls._key_is_valid_xml(key):
-            return key, attr
-        if str(key).isdigit():
-            return 'n%s' % key, attr
-
-        try:
-            return 'n%s' % (float(str(key))), attr
-        except ValueError:
-            pass
-
-        if cls._key_is_valid_xml(key.replace(' ', '_')):
-            return key.replace(' ', '_'), attr
-
-        attr['name'] = key
-        key = 'key'
-        return key, attr
-
-    @staticmethod
-    def _key_is_valid_xml(key):
-        test_xml = '<?xml version="1.0" encoding="UTF-8" ?><%s>foo</%s>' % (key, key)
-        try:
-            parseString(test_xml)
-            return True
-        except Exception:
-            return False
+        float_obj = obj[start_position:end_position]
+        return float(float_obj), end_position + 8
 
     @classmethod
-    def _wrap_cdata(cls, value):
-        value = cls._unicode_me(value).replace(']]>', ']]]]><![CDATA[>')
-        return '<![CDATA[' + value + ']]>'
+    def _loads_none(cls, obj, start_position):
+        end_position = start_position
+        while obj[end_position:end_position + 7] != '</none>':
+            end_position += 1
+
+        return None, end_position + 7
 
     @classmethod
-    def _escape_xml(cls, string):
-        if type(string) is str:
-            string = cls._unicode_me(string)
-            string = string.replace('&', '&amp;')
-            string = string.replace('"', '&quot;')
-            string = string.replace('\'', '&apos;')
-            string = string.replace('<', '&lt;')
-            string = string.replace('>', '&gt;')
-        return string
+    def _loads_list(cls, obj, start_position):
+        end_position = start_position
+        deep = 1
+        while deep:
+            if obj[end_position:end_position + 6] == '<list>':
+                deep += 1
+            if obj[end_position:end_position + 7] == '</list>':
+                deep -= 1
 
-    @staticmethod
-    def _unicode_me(val):
-        try:
-            return str(val, 'utf-8')
-        except:
-            return str(val)
+            end_position += 1
 
-    @staticmethod
-    def _get_xml_type(val):
-        if type(val).__name__ == 'NoneType':
-            return 'null'
-        elif type(val).__name__ == 'bool':
-            return 'bool'
-        elif type(val).__name__ == 'str':
-            return 'str'
-        elif type(val).__name__ == 'int':
-            return 'int'
-        elif type(val).__name__ == 'float':
-            return 'float'
-        elif isinstance(val, numbers.Number):
-            return 'number'
-        elif isinstance(val, dict):
-            return 'dict'
-        elif isinstance(val, Iterable):
-            return 'list'
+        end_position -= 1
+        arr = []
+        position = start_position
+        while position < end_position:
+            result, position = cls._deconvert_from_xml_string(obj, position)
+            arr.append(result)
 
-        return type(val).__name__
-
-    @staticmethod
-    def _make_attr_string(attr):
-        attr_string = ' '.join(['%s="%s"' % (k, v) for k, v in attr.items()])
-        return '%s%s' % (' ' if attr_string != '' else '', attr_string)
-
-    @staticmethod
-    def _make_id(element, start=100000, end=999999):
-        return '%s_%s' % (element, random.randint(start, end))
+        return arr, end_position + 7
 
     @classmethod
-    def _get_unique_id(cls, element):
-        this_id = cls._make_id(element)
-        duplicated = True
-        while duplicated:
-            if this_id not in ids:
-                duplicated = False
-                ids.append(this_id)
-            else:
-                this_id = cls._make_id(element)
-        return ids[-1]
+    def _loads_dict(cls, obj, start_position):
+        end_position = start_position
+        deep = 1
+        while deep:
+            if obj[end_position:end_position + 6] == '<dict>':
+                deep += 1
+            if obj[end_position:end_position + 7] == '</dict>':
+                deep -= 1
+            end_position += 1
+
+        end_position -= 1
+
+        position = start_position
+        result = {}
+
+        while position < end_position:
+            key_start_position = position + 1
+            key_end_position = position + 1
+
+            while obj[key_end_position] != '>':
+                key_end_position += 1
+
+            key = obj[key_start_position:key_end_position]
+
+            value, position = cls._deconvert_from_xml_string(obj, key_end_position + 1)
+            position += 3 + len(key)
+
+            result[key] = value
+
+        return result, end_position + 7
