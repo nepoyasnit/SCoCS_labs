@@ -20,7 +20,7 @@ class XmlSerializer:
 
     @classmethod
     def load(cls, file):
-        return cls.loads(file.write())
+        return cls.loads(file.read())
 
     @classmethod
     def _convert_to_xml_string(cls, obj):
