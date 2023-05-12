@@ -3,11 +3,11 @@ import builtins
 import inspect
 import math
 
-from constants import PRIMITIVE_TYPES, UNSERIALIZABLE_DUNDER, \
+from .constants import PRIMITIVE_TYPES, UNSERIALIZABLE_DUNDER, \
     UNSERIALIZABLE_TYPES, UNSERIALIZABLE_CODE_TYPES, \
     ITERATOR_TYPE, CODE_TYPE, CELL_TYPE, MODULE_TYPE, FUNCTION_TYPE, \
     BYTES_TYPE, CLASS_TYPE, OBJ_TYPE, TUPLE_TYPE, SET_TYPE
-from supportive import get_fathers_class_for_method
+from .supportive import get_fathers_class_for_method
 
 from types import ModuleType, CellType, FunctionType, \
     MethodType, CodeType

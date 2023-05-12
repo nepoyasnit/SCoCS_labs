@@ -1,10 +1,5 @@
-import builtins
-import inspect
-from types import LambdaType, ModuleType, CodeType, WrapperDescriptorType, \
-    MethodDescriptorType, BuiltinFunctionType, MappingProxyType, \
-    GetSetDescriptorType, FunctionType
 
-from constants import PRIMITIVE_TYPES, UNKNOWN_TYPE_ERROR
+import inspect
 
 
 def get_fathers_class_for_method(method):

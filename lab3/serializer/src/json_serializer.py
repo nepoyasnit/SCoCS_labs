@@ -1,6 +1,7 @@
-from constants import UNKNOWN_TYPE_ERROR
 
-from converter import Converter
+from .constants import UNKNOWN_TYPE_ERROR
+
+from .converter import Converter
 
 
 class JsonSerializer:
@@ -48,7 +49,7 @@ class JsonSerializer:
             return cls._loads_string(string_obj, start_index)
         elif string_obj[start_index] == '[':
             return cls._loads_list(string_obj, start_index)
-        elif string_obj[start_index].isdigit():
+        elif string_obj[start_index].isdigit() or string_obj[start_index] == '-':
             return cls._loads_nums(string_obj, start_index)
         elif string_obj[start_index] == 't':
             return True, start_index + 4
@@ -67,6 +68,7 @@ class JsonSerializer:
             end_index += 1
 
         num = obj[start_index:end_index]
+
         if num.count('.'):
             return float(num), end_index
 

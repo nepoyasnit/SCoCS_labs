@@ -1,7 +1,7 @@
-from constants import JSON_DATA_TYPE, TOML_DATA_TYPE, \
+from .constants import JSON_DATA_TYPE, TOML_DATA_TYPE, \
     YAML_DATA_TYPE, UNKNOWN_TYPE_ERROR, XML_DATA_TYPE
-from json_serializer import JsonSerializer
-from xml_serializer import XmlSerializer
+from .json_serializer import JsonSerializer
+from .xml_serializer import XmlSerializer
 
 
 class Factory:
@@ -15,4 +15,5 @@ class Factory:
 
         else:
             raise Exception(UNKNOWN_TYPE_ERROR)
+
 

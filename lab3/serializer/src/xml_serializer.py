@@ -1,5 +1,5 @@
-from constants import UNKNOWN_TYPE_ERROR
-from converter import Converter
+from .constants import UNKNOWN_TYPE_ERROR
+from .converter import Converter
 
 
 class XmlSerializer:
