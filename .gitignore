@@ -7,3 +7,5 @@ __pycache__/
 /lab2/my_container/src/data/
 /maksim_custom_serializer.egg-info/
 /dist
+maksiksay_custom_serializer.egg-info
+tests/test_data
