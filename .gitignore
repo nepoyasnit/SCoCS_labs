@@ -3,3 +3,5 @@ bin/
 lib/
 lib64
 pyvenv.cfg
+__pycache__/
+/lab2/my_container/src/data/
